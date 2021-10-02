@@ -99,11 +99,19 @@ class Meshes {
 }
 
 
-var camConfig = {
-  transformations: new Transformations(),
-  refEnabled: false,
-  refObj: null,
-  FOV: 40
+class Camera {
+  transformations;
+
+  lookAtEnabled = false;
+  lookTarget = null;
+
+  refEnabled = false;
+  refObj = null;
+  FOV = 40;
+
+  constructor() {
+    this.transformations = new Transformations();
+  }
 };
 
 // Fumções de Apoio
@@ -163,19 +171,6 @@ function applyAnimations(object) {
       object.transformations.orbitRotateZ = object.startState.orbitRotateZ
     }
   } else {
-    // object.transformations.rotateX = object.startState.rotateX
-    // object.transformations.rotateY = object.startState.rotateY
-    // object.transformations.rotateZ = object.startState.rotateZ
-    // object.transformations.translateX = object.startState.translateX
-    // object.transformations.translateY = object.startState.translateY
-    // object.transformations.translateZ = object.startState.translateZ
-    // object.transformations.scaleX = object.startState.scaleX
-    // object.transformations.scaleY = object.startState.scaleY
-    // object.transformations.scaleZ = object.startState.scaleZ
-    // object.transformations.orbitRotateX = object.startState.orbitRotateX
-    // object.transformations.orbitRotateY = object.startState.orbitRotateY
-    // object.transformations.orbitRotateZ = object.startState.orbitRotateZ
-
     if (object.loop) {
       animate(object)
     }
@@ -266,4 +261,76 @@ function animate(object) {
   object.startState.orbitRotateZ = object.transformations.orbitRotateZ;
 
   return;
+}
+
+function loadCameraGUI(gui2) {
+
+  var camConfig = new Camera();
+  var camera = gui2.addFolder("Cameras")
+  camera.add(camConfig, "FOV", 5, 160, 0.01);
+  camera.add(camConfig, "lookAtEnabled").name("Look At");
+  var nameList1 = {
+    Target: "none"
+  };
+  var x1 = camera.add(nameList1, 'Target', objectNameList).onFinishChange(function () {
+    var index = objectNameList.indexOf(nameList1.Target);
+    console.log(index)
+    if (index != -1) {
+      camConfig.lookTarget = objectList[index];
+      console.log(camConfig)
+    } else {
+      nameList.Object = "Error"
+    }
+  });
+
+  droplists.push(x1);
+
+  camConfig.transformations.translateZ = 200
+  var trasnforms = camera.addFolder("Transformations")
+  trasnforms.open();
+  trasnforms.add(camConfig.transformations, "translateX", -1000, 1000, 0.01);
+  trasnforms.add(camConfig.transformations, "translateY", -1000, 1000, 0.01);
+  trasnforms.add(camConfig.transformations, "translateZ", -1000, 1000, 0.01);
+  trasnforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
+  trasnforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
+  trasnforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
+
+  var refPoint = trasnforms.addFolder("Rotate Around Object");
+  // refPoint.open();
+
+  refPoint.add(camConfig, "refEnabled").name("Enabled");
+  var nameList = {
+    Object: "none"
+  };
+  var x = refPoint.add(nameList, 'Object', objectNameList).onFinishChange(function () {
+    var index = objectNameList.indexOf(nameList.Object);
+    if (index != -1) {
+      camConfig.refObj = objectList[index];
+      // console.log(camConfig.refObj);
+    } else {
+      nameList.Object = "Error"
+    }
+  });
+
+  // ---------
+  CamList.push(camConfig)
+
+  droplists.push(x);
+
+  refPoint.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01);
+  refPoint.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01);
+  refPoint.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01);
+}
+
+function getSelectedCam() {
+  return CamList[0];
+  //TODO
+}
+
+function getStaticRef(target) {
+  var ref2 = target.refObj;
+  if (ref2 != null)
+    return (getStaticRef(ref2));
+  else
+    return target;
 }

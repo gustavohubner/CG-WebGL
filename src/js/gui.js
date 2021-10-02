@@ -17,52 +17,15 @@ const loadGUI = (mesh, webgl) => {
   const gui2 = new dat.GUI();
 
   // ---- Camera
-  var camera = gui2.addFolder("Cameras")
-  camera.add(camConfig, "FOV", 10, 180, 0.01);
-
-  camConfig.transformations.translateZ = 200
-  var translation = camera.addFolder("Translation")
-  translation.open();
-  translation.add(camConfig.transformations, "translateX", -1000, 1000, 0.01);
-  translation.add(camConfig.transformations, "translateY", -1000, 1000, 0.01);
-  translation.add(camConfig.transformations, "translateZ", -1000, 1000, 0.01);
-  var rotation = camera.addFolder("Axis Rotation")
-  rotation.open();
-  rotation.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
-  rotation.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
-  rotation.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
-
-  var refPoint = camera.addFolder("Orbit Object");
-  // refPoint.open();
-
-  refPoint.add(camConfig, "refEnabled").name("Enabled");
-  var nameList = {
-    Object: "none"
-  };
-  var x = refPoint.add(nameList, 'Object', objectNameList).onFinishChange(function () {
-    var index = objectNameList.indexOf(nameList.Object);
-    if (index != -1) {
-        camConfig.refObj = objectList[index];
-        // console.log(camConfig.refObj);
-    } else {
-      nameList.Object = "Error"
-    }
-  });
-
-  // ---------
-
-
-  droplists.push(x);
-
-  refPoint.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01);
-  refPoint.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01);
-  refPoint.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01);
+  loadCameraGUI(gui2);
 
   obj.AddObject(1, [0, 0, 0], [1, 1, 0, 1], 2);
 
   // obj.AddObject(0.4, [-50, 0, 0], [0, 0.5, 0.5, 1], 2);
   // obj.AddObject(0.2, [-15, 0, 0], [0.5, 0.5, 0.5, 1], 2);
-  // obj.AddObject(0.7, [100, 0, 0], [0.8, 0.4, 0, 1], 2);
+  obj.AddObject(0.7, [100, 0, 0], [0.8, 0.4, 0, 1], 2);
+
+  CamList[0].lookTarget = objList[0];
 };
 
 

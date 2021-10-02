@@ -2,7 +2,8 @@ var meshes;
 var objectList = [];
 var objectNameList = [];
 
-var fieldOfViewRadians = 90;
+var CamList = [];
+var CamNameList = [];
 
 function main() {
   const { gl, meshProgramInfo } = initializeWorld();
@@ -55,6 +56,8 @@ function render() {
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
 
+  var camConfig = getSelectedCam();
+
   var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
   var projectionMatrix = m4.perspective(degToRad(camConfig.FOV), aspect, 1, 2000);
 
@@ -64,13 +67,31 @@ function render() {
     camConfig.transformations.translateX,
     camConfig.transformations.translateY,
     camConfig.transformations.translateZ];
-  var target = [
-    camConfig.transformations.translateX,
-    camConfig.transformations.translateY,
-    camConfig.transformations.translateZ - 1];
+
+  var target
+  // look at
+  if (camConfig.lookAtEnabled) {
+    // camConfig.lookTarget = objectList[0];
+    var camTarget = getStaticRef(camConfig.lookTarget)
+
+    target = [
+      camTarget.transformations.translateX,
+      camTarget.transformations.translateY,
+      camTarget.transformations.translateZ
+    ];
+
+  } else {
+    target = [
+      camConfig.transformations.translateX,
+      camConfig.transformations.translateY,
+      camConfig.transformations.translateZ - 1
+    ];
+  }
+
   var up = [0, 1, 0];
   var cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
+  // rotationa camera com sliders
   cameraMatrix = m4.xRotate(cameraMatrix, camConfig.transformations.rotateX);
   cameraMatrix = m4.yRotate(cameraMatrix, camConfig.transformations.rotateY);
   cameraMatrix = m4.zRotate(cameraMatrix, camConfig.transformations.rotateZ);
@@ -78,6 +99,8 @@ function render() {
   // Make a view matrix from the camera matrix.
   var viewMatrix = m4.inverse(cameraMatrix);
   var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+
+  // fundo preto
   gl.useProgram(meshProgramInfo.program);
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
