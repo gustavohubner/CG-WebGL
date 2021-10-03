@@ -1,10 +1,3 @@
-var meshes;
-var objectList = [];
-var objectNameList = [];
-
-var CamList = [];
-var CamNameList = [];
-
 function main() {
   const { gl, meshProgramInfo } = initializeWorld();
 
@@ -56,40 +49,63 @@ function render() {
   gl.enable(gl.DEPTH_TEST);
   gl.enable(gl.CULL_FACE);
 
-  var camConfig = getSelectedCam();
 
+  // Camera ------------------------------------------------------
+
+  var camConfig = getSelectedCam();
+  // Aplica modificações aos atributos conforme animações
+  applyAnimations(camConfig);
   var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
   var projectionMatrix = m4.perspective(degToRad(camConfig.FOV), aspect, 1, 2000);
 
-  // Camera
   var cameraMatrix = m4.identity()
   var cameraPosition = [
     camConfig.transformations.translateX,
     camConfig.transformations.translateY,
     camConfig.transformations.translateZ];
-
   var target
+
+  if (camConfig.refEnabled && camConfig.refObj != null) {
+    var ref = camConfig.refObj;
+    cameraMatrix = rotateRef(cameraMatrix, ref);
+
+    cameraMatrix = m4.xRotate(cameraMatrix, camConfig.transformations.orbitRotateX);
+    cameraMatrix = m4.yRotate(cameraMatrix, camConfig.transformations.orbitRotateY);
+    cameraMatrix = m4.zRotate(cameraMatrix, camConfig.transformations.orbitRotateZ);
+  }
+
+  cameraMatrix = m4.translate(
+    cameraMatrix,
+    camConfig.transformations.translateX,
+    camConfig.transformations.translateY,
+    camConfig.transformations.translateZ
+  );
+
   // look at
   if (camConfig.lookAtEnabled) {
-    // camConfig.lookTarget = objectList[0];
-    var camTarget = getStaticRef(camConfig.lookTarget)
-
+    var camTarget;
+    if (camConfig.refObj != null) {
+      camTarget = getStaticRef(camConfig.refObj)
+    } else {
+      camTarget = objectList[0]
+    }
     target = [
       camTarget.transformations.translateX,
       camTarget.transformations.translateY,
       camTarget.transformations.translateZ
     ];
 
-  } else {
-    target = [
-      camConfig.transformations.translateX,
-      camConfig.transformations.translateY,
-      camConfig.transformations.translateZ - 1
-    ];
+    var up = [0, 1, 0];
+    cameraMatrix = m4.lookAt(cameraPosition, target, up);
   }
+  // else {
+  //   target = [
+  //     camConfig.transformations.translateX,
+  //     camConfig.transformations.translateY,
+  //     camConfig.transformations.translateZ - 1
+  //   ];
+  // }
 
-  var up = [0, 1, 0];
-  var cameraMatrix = m4.lookAt(cameraPosition, target, up);
 
   // rotationa camera com sliders
   cameraMatrix = m4.xRotate(cameraMatrix, camConfig.transformations.rotateX);

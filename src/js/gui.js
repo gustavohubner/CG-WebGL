@@ -1,20 +1,16 @@
-var objectCount = 0;
-var objGUI;
-var list;
 var meshProgramInfo;
 var gl;
-var droplists = [];
 
 const loadGUI = (mesh, webgl) => {
   gl = webgl;
   meshProgramInfo = mesh;
-  const gui = new dat.GUI();
+  gui = new dat.GUI();
 
   gui.add(obj, 'AddObject');
   var objList = gui.addFolder("Objects")
   objList.open()
   objGUI = objList;
-  const gui2 = new dat.GUI();
+  gui2 = new dat.GUI();
 
   // ---- Camera
   loadCameraGUI(gui2);
@@ -25,10 +21,8 @@ const loadGUI = (mesh, webgl) => {
   // obj.AddObject(0.2, [-15, 0, 0], [0.5, 0.5, 0.5, 1], 2);
   obj.AddObject(0.7, [100, 0, 0], [0.8, 0.4, 0, 1], 2);
 
-  CamList[0].lookTarget = objList[0];
+  // CamList[0].lookTarget = objList[0];
 };
-
-
 
 
 //
@@ -152,7 +146,7 @@ var obj = {
     }, "Add animation");
 
     updateDropLists();
-  },
+  }
 };
 
 function updateDropLists() {
