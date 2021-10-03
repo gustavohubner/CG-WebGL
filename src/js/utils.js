@@ -262,7 +262,7 @@ function rotateRef(matrix, ref) {
 }
 
 function animate(object) {
-  var totalTime = 10;
+  var totalTime = 0;
   object.animation.forEach(anim => {
     anim.start = Date.now() + totalTime;
     anim.finish = anim.start + (anim.duration * 1000);
