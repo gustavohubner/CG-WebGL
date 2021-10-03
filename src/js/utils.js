@@ -54,6 +54,8 @@ class Object3D {
   BufferInfo;
   VAO;
 
+  worldPosition;
+
   transformations;
   startState;
   animation = [];
@@ -127,7 +129,7 @@ class Camera {
   refEnabled = false;
   refObj = null;
 
-  FOV = 40;
+  FOV = 50;
 
   constructor() {
     this.transformations = new Transformations();
@@ -135,32 +137,6 @@ class Camera {
     this.transformations.translateZ = 200;
   }
 };
-
-class SaveFile {
-  // meshes;
-  objectList = [];
-  objectNameList = [];
-  CamList = [];
-  CamNameList = [];
-  // droplists = [];
-  objectCount = 0;
-  // objGUI;
-  // gui;
-  // gui2;
-
-  constructor() {
-    // this.meshes = meshes
-    this.objectList = objectList
-    this.objectNameList = objectNameList
-    this.CamList = CamList
-    this.CamNameList = CamNameList
-    // this.droplists = droplists
-    this.objectCount = objectCount
-    // this.objGUI = objGUI
-    // this.gui = gui
-    // this.gui2 = gui2
-  }
-}
 
 // Fumções de Apoio
 
@@ -204,7 +180,7 @@ function applyAnimations(object) {
 
     //terminou animação retorna ao estado inicial
     if (ended) {
-      console.log(ended)
+      // console.log(ended)
       object.transformations.rotateX = object.startState.rotateX
       object.transformations.rotateY = object.startState.rotateY
       object.transformations.rotateZ = object.startState.rotateZ
@@ -313,7 +289,8 @@ function animate(object) {
 
 function loadCameraGUI(gui2) {
 
-  var camera = gui2.addFolder("Cameras")
+  var camera = gui2.addFolder("Cameras",{ autoPlace: false })
+  camera.domElement.id = 'camera';
 
   var cameraList = {
     Target: "none"
@@ -347,15 +324,15 @@ var addCamBtn = {
     var look = folder.add(camConfig, "lookAtEnabled").name("Look At").listen();
     var rotate = folder.add(camConfig, "refEnabled").name("Rotate Around").listen();
 
-    look.onChange(function () {
-      camConfig.refEnabled = false;
-      camConfig.lookAtEnabled = true;
-    });
+    // look.onChange(function () {
+    //   camConfig.refEnabled = false;
+    //   camConfig.lookAtEnabled = true;
+    // });
 
-    rotate.onChange(function () {
-      camConfig.refEnabled = true;
-      camConfig.lookAtEnabled = false;
-    });
+    // rotate.onChange(function () {
+    //   camConfig.refEnabled = true;
+    //   camConfig.lookAtEnabled = false;
+    // });
 
     var nameList = {
       Target: "none"
@@ -437,12 +414,3 @@ var addCamBtn = {
 function getSelectedCam() {
   return CamList[selectedCam];
 }
-
-function getStaticRef(target) {
-  var ref2 = target.refObj;
-  if (ref2 != null)
-    return (getStaticRef(ref2));
-  else
-    return target;
-}
-

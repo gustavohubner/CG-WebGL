@@ -8,12 +8,13 @@ function main() {
 }
 
 function computeMatrix(viewProjectionMatrix, object) {
-  var matrix = viewProjectionMatrix;
+  // var matrix = viewProjectionMatrix;
+  var matrix = m4.identity();
+
 
   // Se usar rotação en torno de um Objeto de referência
   if (object.refEnabled && object.refObj != null) {
     var ref = object.refObj;
-
     matrix = rotateRef(matrix, ref);
     // caso tenha rotação em torno de Referencia
     // é uma função recursiva para aplicar as rotações e translações necessárias
@@ -37,9 +38,12 @@ function computeMatrix(viewProjectionMatrix, object) {
   matrix = m4.yRotate(matrix, object.transformations.rotateY);
   matrix = m4.zRotate(matrix, object.transformations.rotateZ);
 
-
   matrix = m4.scale(matrix, object.transformations.scaleX, object.transformations.scaleY, object.transformations.scaleZ);
-  return matrix;
+
+  object.worldPosition = [matrix[12],matrix[13],matrix[14]];
+
+  //multiplico somente no final para obter a posição do objeto apos a rotação
+  return m4.multiply(viewProjectionMatrix,matrix);
 }
 
 function render() {
@@ -51,12 +55,11 @@ function render() {
 
 
   // Camera ------------------------------------------------------
-
   var camConfig = getSelectedCam();
   // Aplica modificações aos atributos conforme animações
   applyAnimations(camConfig);
   var aspect = gl.canvas.clientWidth / gl.canvas.clientHeight;
-  var projectionMatrix = m4.perspective(degToRad(camConfig.FOV), aspect, 1, 2000);
+  var projectionMatrix = m4.perspective(degToRad(camConfig.FOV), aspect, 1, 4000);
 
   var cameraMatrix = m4.identity()
   var cameraPosition = [
@@ -65,6 +68,7 @@ function render() {
     camConfig.transformations.translateZ];
   var target
 
+  // Rotacionar em torno de objeto
   if (camConfig.refEnabled && camConfig.refObj != null) {
     var ref = camConfig.refObj;
     cameraMatrix = rotateRef(cameraMatrix, ref);
@@ -85,36 +89,32 @@ function render() {
   if (camConfig.lookAtEnabled) {
     var camTarget;
     if (camConfig.refObj != null) {
-      camTarget = getStaticRef(camConfig.refObj)
+      camTarget = camConfig.refObj;
     } else {
-      camTarget = objectList[0]
+      camTarget = objectList[0];
     }
     target = [
-      camTarget.transformations.translateX,
-      camTarget.transformations.translateY,
-      camTarget.transformations.translateZ
+      camTarget.worldPosition[0],
+      camTarget.worldPosition[1],
+      camTarget.worldPosition[2]
     ];
 
     var up = [0, 1, 0];
     cameraMatrix = m4.lookAt(cameraPosition, target, up);
   }
-  // else {
-  //   target = [
-  //     camConfig.transformations.translateX,
-  //     camConfig.transformations.translateY,
-  //     camConfig.transformations.translateZ - 1
-  //   ];
-  // }
 
-
-  // rotationa camera com sliders
-  cameraMatrix = m4.xRotate(cameraMatrix, camConfig.transformations.rotateX);
-  cameraMatrix = m4.yRotate(cameraMatrix, camConfig.transformations.rotateY);
-  cameraMatrix = m4.zRotate(cameraMatrix, camConfig.transformations.rotateZ);
+  // rotationa camera com sliders, se lookAt desativado
+  if (!camConfig.lookAtEnabled) {
+    cameraMatrix = m4.xRotate(cameraMatrix, camConfig.transformations.rotateX);
+    cameraMatrix = m4.yRotate(cameraMatrix, camConfig.transformations.rotateY);
+    cameraMatrix = m4.zRotate(cameraMatrix, camConfig.transformations.rotateZ);
+  }
 
   // Make a view matrix from the camera matrix.
   var viewMatrix = m4.inverse(cameraMatrix);
   var viewProjectionMatrix = m4.multiply(projectionMatrix, viewMatrix);
+  // Camera ------------------------------------------------------
+
 
   // fundo preto
   gl.useProgram(meshProgramInfo.program);

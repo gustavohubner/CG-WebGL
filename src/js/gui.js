@@ -4,26 +4,9 @@ var gl;
 
 var save
 const loadGUI = (mesh, webgl) => {
-  // var params = {
-  //   loadFile: function () {
-  //     document.getElementById('myInput').click();
-  //     document.getElementById('myInput').addEventListener('change', function () {
-
-  //       var fr = new FileReader();
-  //       fr.onload = function () {
-  //         console.log(JSON.parse(fr.result));
-  //         save= JSON.parse(fr.result);
-  //         loadSaveFile(save);
-  //       }
-  //       fr.readAsText(this.files[0]);
-  //     })
-  //   }
-  // };
-
   gl = webgl;
   meshProgramInfo = mesh;
   gui = new dat.GUI();
-  // gui.add(params, 'loadFile').name('Load file');
   gui.add(obj, 'AddObject');
   var objList = gui.addFolder("Objects")
   objList.open()
@@ -33,13 +16,48 @@ const loadGUI = (mesh, webgl) => {
   // ---- Camera
   loadCameraGUI(gui2);
 
-  obj.AddObject(1, [0, 0, 0], [1, 1, 0, 1], 2);
+  obj.AddObject(0.7, [0, 0, 0], [1, 0.8, 0, 0.3], 2,"Sun"); //sol
 
-  // obj.AddObject(0.4, [-50, 0, 0], [0, 0.5, 0.5, 1], 2);
-  // obj.AddObject(0.2, [-15, 0, 0], [0.5, 0.5, 0.5, 1], 2);
-  obj.AddObject(0.7, [100, 0, 0], [0.8, 0.4, 0, 1], 2);
+  obj.AddObject(0.095, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Mercury"); // Mercurio
+  obj.AddObject(0.237, [25.3, 0, 0], [1, 0.9, 0.4, 0.7], 2, "Venus"); // Venus
+  obj.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth"); // Terra
+  obj.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars"); // Marte
+  obj.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter"); // Jupiter
+  obj.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); // Saturno
+  obj.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus"); // Urano
+  obj.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); // Netuno
 
-  // CamList[0].lookTarget = objList[0];
+  obj.AddObject(1, [0, 0, 0], [0.9, 0.8, 0.6, 1], 2, "Saturn Ring"); // anel Saturno
+  objectList[9].transformations.scaleY = 0.05
+  objectList[9].refObj = objectList[6]
+  objectList[9].refEnabled = true
+
+
+
+  var periods = [0.39, 0.72, 1.00, 1.52, 5.20, 9.58, 19.20, 30.05];
+  CamList[0].transformations.translateZ = 900;
+  CamList[0].transformations.translateY = 100;
+
+  for (var i = 1; i < 9; i++) {
+    objectList[i].refObj = objectList[0];
+    objectList[i].refEnabled = true;
+    objectList[i].running = true;
+    objectList[i].loop = true;
+
+    anim = new Animation;
+    anim.duration = periods[i - 1] * 3;
+    anim.transformations.orbitRotateY = degToRad(360);
+    anim.transformations.scaleX = objectList[i].transformations.scaleX;
+    anim.transformations.scaleY = objectList[i].transformations.scaleY;
+    anim.transformations.scaleZ = objectList[i].transformations.scaleZ;
+    objectList[i].animation.push(anim);
+    animate(objectList[i]);
+  }
+
+  CamList[0].refObj = objectList[3];
+  // CamList[0].lookAtEnabled = true;
+
+
 };
 
 
@@ -48,9 +66,8 @@ const loadGUI = (mesh, webgl) => {
 //
 
 var obj = {
-  AddObject: function (scale1, position, color, type) {
-    var name = ("Object " + objectCount)
-    var mesh = new Object3D(meshProgramInfo, gl, scale1 ? scale1 : 1, position ? position : [0, 0, 0], name, color, type ? type : 1);
+  AddObject: function (scale1, position, color, type, name) {
+    var mesh = new Object3D(meshProgramInfo, gl, scale1 ? scale1 : 1, position ? position : [0, 0, 0], name ? name : ("Object " + objectCount), color, type ? type : 1);
     var animIndex = 0;
     var obj = objGUI.addFolder(name);
     // obj.open()
