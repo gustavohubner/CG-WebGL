@@ -1,11 +1,29 @@
 var meshProgramInfo;
 var gl;
 
+
+var save
 const loadGUI = (mesh, webgl) => {
+  // var params = {
+  //   loadFile: function () {
+  //     document.getElementById('myInput').click();
+  //     document.getElementById('myInput').addEventListener('change', function () {
+
+  //       var fr = new FileReader();
+  //       fr.onload = function () {
+  //         console.log(JSON.parse(fr.result));
+  //         save= JSON.parse(fr.result);
+  //         loadSaveFile(save);
+  //       }
+  //       fr.readAsText(this.files[0]);
+  //     })
+  //   }
+  // };
+
   gl = webgl;
   meshProgramInfo = mesh;
   gui = new dat.GUI();
-
+  // gui.add(params, 'loadFile').name('Load file');
   gui.add(obj, 'AddObject');
   var objList = gui.addFolder("Objects")
   objList.open()
@@ -47,35 +65,15 @@ var obj = {
       }
     }, "Remove");
 
-    var transformations = obj.addFolder('Transformations')
-
-    var translation = transformations.addFolder("Translation");
-    // translation.open();
-    translation.add(mesh.transformations, "translateX", -100, 100, 0.01);
-    translation.add(mesh.transformations, "translateY", -100, 100, 0.01);
-    translation.add(mesh.transformations, "translateZ", -100, 100, 0.01);
-
-    var rotation = transformations.addFolder("Axis Rotation");
-    // rotation.open();
-    rotation.add(mesh.transformations, "rotateX", degToRad(0), degToRad(360), 0.01);
-    rotation.add(mesh.transformations, "rotateY", degToRad(0), degToRad(360), 0.01);
-    rotation.add(mesh.transformations, "rotateZ", degToRad(0), degToRad(360), 0.01);
-
-    var scale = transformations.addFolder("Scale");
-    // scale.open();
-    scale.add(mesh.transformations, "scaleX", 0.01, 10, 0.01);
-    scale.add(mesh.transformations, "scaleY", 0.01, 10, 0.01);
-    scale.add(mesh.transformations, "scaleZ", 0.01, 10, 0.01);
 
 
-    var refPoint = transformations.addFolder("Orbit Object");
     // refPoint.open();
 
-    refPoint.add(mesh, "refEnabled").name("Enabled");
+    obj.add(mesh, "refEnabled").name("Enabled").name("Rotate Around Object");
     var nameList = {
       Object: "none"
     };
-    var x = refPoint.add(nameList, 'Object', objectNameList).onFinishChange(function () {
+    var x = obj.add(nameList, 'Object', objectNameList).name('Target').onFinishChange(function () {
       var index = objectNameList.indexOf(nameList.Object);
       if (index != -1) {
         if (objectNameList[index] != name) {
@@ -91,9 +89,23 @@ var obj = {
     });
     droplists.push(x);
 
-    refPoint.add(mesh.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01);
-    refPoint.add(mesh.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01);
-    refPoint.add(mesh.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01);
+    var transformations = obj.addFolder('Transformations')
+
+    transformations.add(mesh.transformations, "translateX", -100, 100, 0.01).listen();
+    transformations.add(mesh.transformations, "translateY", -100, 100, 0.01).listen();
+    transformations.add(mesh.transformations, "translateZ", -100, 100, 0.01).listen();
+
+    transformations.add(mesh.transformations, "rotateX", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "rotateY", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "rotateZ", degToRad(0), degToRad(360), 0.01).listen();
+
+    transformations.add(mesh.transformations, "scaleX", 0.01, 10, 0.01).listen();
+    transformations.add(mesh.transformations, "scaleY", 0.01, 10, 0.01).listen();
+    transformations.add(mesh.transformations, "scaleZ", 0.01, 10, 0.01).listen();
+
+    transformations.add(mesh.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01).listen();
 
     var curves = transformations.addFolder("Curves");
 
@@ -127,19 +139,19 @@ var obj = {
         newAnim.transformations.scaleY = mesh.transformations.scaleY
         newAnim.transformations.scaleZ = mesh.transformations.scaleZ
 
-        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "translateX", -100, 100, 0.01);
-        folder.add(newAnim.transformations, "translateY", -100, 100, 0.01);
-        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01);
-        folder.add(newAnim.transformations, "scaleX", 0.01, 10, 0.01);
-        folder.add(newAnim.transformations, "scaleY", 0.01, 10, 0.01);
-        folder.add(newAnim.transformations, "scaleZ", 0.01, 10, 0.01);
-        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim, "duration", 0.01, 1000, 0.01);
+        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "translateX", -100, 100, 0.01).listen();
+        folder.add(newAnim.transformations, "translateY", -100, 100, 0.01).listen();
+        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01).listen();
+        folder.add(newAnim.transformations, "scaleX", 0.01, 10, 0.01).listen();
+        folder.add(newAnim.transformations, "scaleY", 0.01, 10, 0.01).listen();
+        folder.add(newAnim.transformations, "scaleZ", 0.01, 10, 0.01).listen();
+        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim, "duration", 0.01, 1000, 0.01).listen();
 
         mesh.animation.push(newAnim);
       }
@@ -155,6 +167,19 @@ function updateDropLists() {
     var i;
     for (i = 0; i < objectNameList.length; i++) {
       var str = "<option value='" + objectNameList[i] + "'>" + objectNameList[i] + "</option>";
+      innerHTMLStr += str;
+
+    }
+    if (innerHTMLStr != "") object.domElement.children[0].innerHTML = innerHTMLStr;
+  });
+}
+
+function updateDropListCam() {
+  droplistsCam.forEach(object => {
+    innerHTMLStr = "";
+    var i;
+    for (i = 0; i < CamNameList.length; i++) {
+      var str = "<option value='" + CamNameList[i] + "'>" + CamNameList[i] + "</option>";
       innerHTMLStr += str;
 
     }

@@ -1,18 +1,24 @@
 var meshes;
+
 var objectList = [];
 var objectNameList = [];
+var objectCount = 0;
 
 var CamList = [];
 var CamNameList = [];
+var CamCount = 0;
+
+var selectedCam = 0;
 
 var droplists = [];
+var droplistsCam = [];
 
-var objectCount = 0;
 var objGUI;
-
 var gui;
 var gui2;
+var camFolder;
 
+var debug;
 
 const degToRad = (d) => (d * Math.PI) / 180;
 
@@ -126,6 +132,7 @@ class Camera {
   constructor() {
     this.transformations = new Transformations();
     this.startState = new Transformations();
+    this.transformations.translateZ = 200;
   }
 };
 
@@ -305,99 +312,130 @@ function animate(object) {
 }
 
 function loadCameraGUI(gui2) {
-  var animIndex = 0;
-  var camConfig = new Camera();
+
   var camera = gui2.addFolder("Cameras")
-  camera.add(camConfig, "FOV", 5, 160, 0.01);
 
-  var look = camera.add(camConfig, "lookAtEnabled").name("Look At").listen();
-  var rotate = camera.add(camConfig, "refEnabled").name("Rotate Around").listen();
-
-  look.onChange(function () {
-    camConfig.refEnabled = false;
-    camConfig.lookAtEnabled = true;
-  });
-
-  rotate.onChange(function () {
-    camConfig.refEnabled = true;
-    camConfig.lookAtEnabled = false;
-  });
-  var nameList = {
+  var cameraList = {
     Target: "none"
   };
-  var x = camera.add(nameList, 'Target', objectNameList).onFinishChange(function () {
-    var index = objectNameList.indexOf(nameList.Target);
+  var x2 = camera.add(cameraList, 'Target', CamNameList).name("Selected Camera").listen().onChange(function () {
+    var index = CamNameList.indexOf(cameraList.Target);
     if (index != -1) {
-      camConfig.refObj = objectList[index];
+      selectedCam = index;
       // console.log(camConfig.refObj);
     } else {
-      nameList.Target = "Error"
+      nameList.Target = "Error";
     }
   });
-  droplists.push(x);
+  droplistsCam.push(x2);
 
-  camConfig.transformations.translateZ = 200
-  var transforms = camera.addFolder("Transformations");
-  // transforms.open();
-  transforms.add(camConfig.transformations, "translateX", -1000, 1000, 0.01);
-  transforms.add(camConfig.transformations, "translateY", -1000, 1000, 0.01);
-  transforms.add(camConfig.transformations, "translateZ", -1000, 1000, 0.01);
-  transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
-  transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
-  transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
-  transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01);
-  transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01);
-  transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01);
-  CamList.push(camConfig)
+  camera.add(addCamBtn, "AddCamera").name("Add Camera");
+  camFolder = camera.addFolder("Cameras List");
+  camFolder.open();
+  addCamBtn.AddCamera();
+}
+
+var addCamBtn = {
+  AddCamera: function () {
+    var animIndex = 0;
+    var name = "Camera " + CamCount;
+    var camConfig = new Camera();
+    CamCount++;
+
+    var folder = camFolder.addFolder(name)
+    folder.add(camConfig, "FOV", 5, 160, 0.01);
+    var look = folder.add(camConfig, "lookAtEnabled").name("Look At").listen();
+    var rotate = folder.add(camConfig, "refEnabled").name("Rotate Around").listen();
+
+    look.onChange(function () {
+      camConfig.refEnabled = false;
+      camConfig.lookAtEnabled = true;
+    });
+
+    rotate.onChange(function () {
+      camConfig.refEnabled = true;
+      camConfig.lookAtEnabled = false;
+    });
+
+    var nameList = {
+      Target: "none"
+    }; folder
+    var x = folder.add(nameList, 'Target', objectNameList).onFinishChange(function () {
+      var index = objectNameList.indexOf(nameList.Target);
+      if (index != -1) {
+        camConfig.refObj = objectList[index];
+        // console.log(camConfig.refObj);
+      } else {
+        nameList.Target = "Error"
+      }
+    }).listen();
+    droplists.push(x);
+
+    // camConfig.transformations.translateZ = 200
+    var transforms = folder.addFolder("Transformations");
+    // transforms.open();
+    transforms.add(camConfig.transformations, "translateX", -1000, 1000, 0.01).listen();
+    transforms.add(camConfig.transformations, "translateY", -1000, 1000, 0.01).listen();
+    transforms.add(camConfig.transformations, "translateZ", -1000, 1000, 0.01).listen();
+    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01).listen();
+    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01).listen();
+    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01).listen();
+    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01).listen();
+    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01).listen();
+    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01).listen();
+    // CamList.push(camConfig)
+
+    var anim = folder.addFolder("Animations");
+    anim.add({
+      'Animate': function () {
+        animate(camConfig);
+      }
+    }, "Animate");
 
 
-  var anim = camera.addFolder("Animations");
-  anim.add({
-    'Animate': function () {
-      animate(camConfig);
-    }
-  }, "Animate");
+    anim.add(camConfig, "loop")
 
+    anim.add({
+      'Add animation': function (folder) {
+        var folder = anim.addFolder("Animation " + animIndex)
+        var newAnim = new Animation();
+        folder.add({
+          'Remove': function () {
+            anim.removeFolder(folder);
+            var index = camConfig.animation.indexOf(newAnim)
+            camConfig.animation.splice(index, 1);
+          }
+        }, 'Remove')
+        animIndex++;
 
-  anim.add(camConfig, "loop")
+        newAnim.transformations.scaleX = camConfig.transformations.scaleX
+        newAnim.transformations.scaleY = camConfig.transformations.scaleY
+        newAnim.transformations.scaleZ = camConfig.transformations.scaleZ
 
-  anim.add({
-    'Add animation': function (folder) {
-      var folder = anim.addFolder("Animation " + animIndex)
-      var newAnim = new Animation();
-      folder.add({
-        'Remove': function () {
-          anim.removeFolder(folder);
-          var index = camConfig.animation.indexOf(newAnim)
-          camConfig.animation.splice(index, 1);
-        }
-      }, 'Remove')
-      animIndex++;
+        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "translateX", -100, 100, 0.01).listen();
+        folder.add(newAnim.transformations, "translateY", -100, 100, 0.01).listen();
+        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01).listen();
+        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim, "duration", 0.01, 1000, 0.01);
 
-      newAnim.transformations.scaleX = camConfig.transformations.scaleX
-      newAnim.transformations.scaleY = camConfig.transformations.scaleY
-      newAnim.transformations.scaleZ = camConfig.transformations.scaleZ
+        camConfig.animation.push(newAnim);
+      }
+    }, "Add animation");
 
-      folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
-      folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
-      folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
-      folder.add(newAnim.transformations, "translateX", -100, 100, 0.01);
-      folder.add(newAnim.transformations, "translateY", -100, 100, 0.01);
-      folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01);
-      folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01);
-      folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01);
-      folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01);
-      folder.add(newAnim, "duration", 0.01, 1000, 0.01);
-
-      camConfig.animation.push(newAnim);
-    }
-  }, "Add animation");
+    CamNameList.push(name);
+    CamList.push(camConfig);
+    updateDropListCam();
+  }
 
 }
 
 function getSelectedCam() {
-  return CamList[0];
-  //TODO
+  return CamList[selectedCam];
 }
 
 function getStaticRef(target) {
@@ -408,15 +446,3 @@ function getStaticRef(target) {
     return target;
 }
 
-// Salvar para arquivo 
-function downloadSavefile(obj, filename) {
-  var savefile = new SaveFile()
-  var blob = new Blob([JSON.stringify(savefile, null, 2)], { type: "application/json;charset=utf-8" }).slice(2, -1);
-  var url = URL.createObjectURL(blob);
-  var elem = document.createElement("a");
-  elem.href = url;
-  elem.download = filename;
-  document.body.appendChild(elem);
-  elem.click();
-  document.body.removeChild(elem);
-}
