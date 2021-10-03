@@ -114,7 +114,7 @@ class Meshes {
   Cone;
   constructor(gl) {
     this.Cube = flattenedPrimitives.createCubeBufferInfo(gl, 20);
-    this.Sphere = flattenedPrimitives.createSphereBufferInfo(gl, 10, 12, 6);
+    this.Sphere = flattenedPrimitives.createSphereBufferInfo(gl, 10, 24, 12);
     this.Cone = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
   }
 }
@@ -289,7 +289,7 @@ function animate(object) {
 
 function loadCameraGUI(gui2) {
 
-  var camera = gui2.addFolder("Cameras",{ autoPlace: false })
+  var camera = gui2.addFolder("Cameras", { autoPlace: false })
   camera.domElement.id = 'camera';
 
   var cameraList = {
@@ -342,15 +342,15 @@ var addCamBtn = {
     // camConfig.transformations.translateZ = 200
     var transforms = folder.addFolder("Transformations");
     // transforms.open();
-    transforms.add(camConfig.transformations, "translateX", -1000, 1000, 0.01).listen();
-    transforms.add(camConfig.transformations, "translateY", -1000, 1000, 0.01).listen();
-    transforms.add(camConfig.transformations, "translateZ", -1000, 1000, 0.01).listen();
-    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01).listen();
-    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01).listen();
-    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01).listen();
-    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01).listen();
-    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01).listen();
-    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01).listen();
+    transforms.add(camConfig.transformations, "translateX", -1000, 1000, 0.0001);
+    transforms.add(camConfig.transformations, "translateY", -1000, 1000, 0.0001);
+    transforms.add(camConfig.transformations, "translateZ", -1000, 1000, 0.0001);
+    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.0001);
+    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.0001);
+    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.0001);
+    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.0001);
+    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.0001);
+    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.0001);
     // CamList.push(camConfig)
 
     var anim = folder.addFolder("Animations");
@@ -380,15 +380,15 @@ var addCamBtn = {
         newAnim.transformations.scaleY = camConfig.transformations.scaleY
         newAnim.transformations.scaleZ = camConfig.transformations.scaleZ
 
-        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "translateX", -100, 100, 0.01);
-        folder.add(newAnim.transformations, "translateY", -100, 100, 0.01);
-        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01);
-        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01);
-        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.0001);
+        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.0001);
+        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.0001);
+        folder.add(newAnim.transformations, "translateX", -100, 100, 0.0001);
+        folder.add(newAnim.transformations, "translateY", -100, 100, 0.0001);
+        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.0001);
+        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.0001);
+        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.0001);
+        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.0001);
         folder.add(newAnim, "duration", 0.01, 1000, 0.01);
 
         camConfig.animation.push(newAnim);
@@ -404,4 +404,65 @@ var addCamBtn = {
 
 function getSelectedCam() {
   return CamList[selectedCam];
+}
+
+function loadSolarSystem() {
+  obj.AddObject(0.7, [0, 0, 0], [1, 0.8, 0, 0.3], 2, "Sun"); //sol
+
+  // Planetas:
+  obj.AddObject(0.095, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Mercury"); // Mercurio
+  obj.AddObject(0.237, [25.3, 0, 0], [1, 0.9, 0.4, 0.7], 2, "Venus"); // Venus
+  obj.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth"); // Terra
+  obj.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars"); // Marte
+  obj.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter"); // Jupiter
+  obj.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); // Saturno
+  obj.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus"); // Urano
+  obj.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); // Netuno
+
+  // Luas:
+  obj.AddObject(0.067, [5, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Earth - Moon");
+
+  obj.AddObject(0.060, [10, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Io");
+  obj.AddObject(0.05, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Europa");
+  obj.AddObject(0.08, [20, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Ganymede");
+  obj.AddObject(0.074, [30, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Callisto");
+
+
+
+  obj.AddObject(1, [0, 0, 0], [0.9, 0.8, 0.6, 1], 2, "Saturn Ring"); // Anel Saturnp
+  objectList[14].transformations.scaleY = 0.05
+  objectList[14].refObj = objectList[6]
+  objectList[14].refEnabled = true
+
+
+
+  var periods = [0.39, 0.72, 1.00, 1.52, 5.20, 9.58, 19.20, 30.05, 0.07, 0.1, 0.2, 0.4, 0.9];
+  CamList[0].transformations.translateZ = 900;
+  CamList[0].transformations.translateY = 100;
+
+  for (var i = 1; i < 14; i++) {
+    objectList[i].refObj = objectList[0];
+    objectList[i].refEnabled = true;
+    objectList[i].running = true;
+    objectList[i].loop = true;
+
+    anim = new Animation;
+    anim.duration = periods[i - 1] * 10;
+    anim.transformations.orbitRotateY = degToRad(360);
+    anim.transformations.scaleX = objectList[i].transformations.scaleX;
+    anim.transformations.scaleY = objectList[i].transformations.scaleY;
+    anim.transformations.scaleZ = objectList[i].transformations.scaleZ;
+    objectList[i].animation.push(anim);
+    animate(objectList[i]);
+  }
+
+  objectList[9].refObj = objectList[3]
+
+  objectList[10].refObj = objectList[5]
+  objectList[11].refObj = objectList[5]
+  objectList[12].refObj = objectList[5]
+  objectList[13].refObj = objectList[5]
+
+  CamList[0].refObj = objectList[3];
+  CamList[0].transformations.rotateX = -0.11;
 }
