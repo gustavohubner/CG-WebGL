@@ -412,15 +412,15 @@ var addCamBtn = {
         newAnim.transformations.scaleY = camConfig.transformations.scaleY
         newAnim.transformations.scaleZ = camConfig.transformations.scaleZ
 
-        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01).listen();
-        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01).listen();
-        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01).listen();
-        folder.add(newAnim.transformations, "translateX", -100, 100, 0.01).listen();
-        folder.add(newAnim.transformations, "translateY", -100, 100, 0.01).listen();
-        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01).listen();
-        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01).listen();
-        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01).listen();
-        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01).listen();
+        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "translateX", -100, 100, 0.01);
+        folder.add(newAnim.transformations, "translateY", -100, 100, 0.01);
+        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.01);
+        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.01);
         folder.add(newAnim, "duration", 0.01, 1000, 0.01);
 
         camConfig.animation.push(newAnim);
