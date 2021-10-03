@@ -55,6 +55,7 @@ const loadGUI = (mesh, webgl) => {
   }
 
   CamList[0].refObj = objectList[3];
+  CamList[0].transformations.rotateX = -0.11;
   // CamList[0].lookAtEnabled = true;
 
 

@@ -324,15 +324,6 @@ var addCamBtn = {
     var look = folder.add(camConfig, "lookAtEnabled").name("Look At").listen();
     var rotate = folder.add(camConfig, "refEnabled").name("Rotate Around").listen();
 
-    // look.onChange(function () {
-    //   camConfig.refEnabled = false;
-    //   camConfig.lookAtEnabled = true;
-    // });
-
-    // rotate.onChange(function () {
-    //   camConfig.refEnabled = true;
-    //   camConfig.lookAtEnabled = false;
-    // });
 
     var nameList = {
       Target: "none"
