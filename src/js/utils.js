@@ -18,7 +18,6 @@ var gui;
 var gui2;
 var camFolder;
 
-var debug;
 
 const degToRad = (d) => (d * Math.PI) / 180;
 
@@ -50,22 +49,27 @@ class Transformations {
   constructor() { }
 }
 class Object3D {
+  meshProgramInfo
+  gl
+
   Uniforms;
   BufferInfo;
   VAO;
 
   worldPosition;
-
   transformations;
+
   startState;
   animation = [];
+  running = false;
+  loop = false;
 
   refObj = null;
   refEnabled = false;
 
-  running = false;
-  loop = false;
+
   constructor(meshProgramInfo, gl, scale, position, name, color, type) {
+    type = parseInt(type, 10);
     var colors
     if (color)
       colors = color;
@@ -77,7 +81,6 @@ class Object3D {
       u_colorMult: colors,
       u_matrix: (m4.identity())
     };
-
     if (type) {
       switch (type) {
         case 1: this.BufferInfo = meshes.Cube; break;
@@ -104,8 +107,6 @@ class Object3D {
     this.transformations.translateX = position[0];
     this.transformations.translateY = position[1];
     this.transformations.translateZ = position[2];
-
-
   }
 }
 class Meshes {

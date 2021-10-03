@@ -1,13 +1,26 @@
 var meshProgramInfo;
 var gl;
+var params = {
+  selected: 1,
+  color: [255, 255, 255]
 
+}
 
 var save
 const loadGUI = (mesh, webgl) => {
   gl = webgl;
   meshProgramInfo = mesh;
+
+  var shapes = {
+    Cube: 1,
+    Sphere: 2,
+    Cone: 3
+  }
+
   gui = new dat.GUI();
   gui.add(obj, 'AddObject');
+  gui.add(params, "selected", shapes).name("Cube").name('Shape')
+  gui.addColor(params, 'color').name('Color');
   var objList = gui.addFolder("Objects")
   objList.open()
   objGUI = objList;
@@ -17,7 +30,7 @@ const loadGUI = (mesh, webgl) => {
   loadCameraGUI(gui2);
 
   // Carrega exemplo
-  loadSolarSystem();
+  // loadSolarSystem();
 };
 
 
@@ -27,9 +40,11 @@ const loadGUI = (mesh, webgl) => {
 
 var obj = {
   AddObject: function (scale1, position, color, type, name) {
-    var mesh = new Object3D(meshProgramInfo, gl, scale1 ? scale1 : 1, position ? position : [0, 0, 0], name ? name : ("Object " + objectCount), color, type ? type : 1);
+    name = name ? name : ("Object " + objectCount);
+    color = color ? color : [params.color[0] / 255, params.color[1] / 255, params.color[2] / 255,1];
+    var mesh = new Object3D(meshProgramInfo, gl, scale1 ? scale1 : 1, position ? position : [0, 0, 0], name, color, type ? type : params.selected);
     var animIndex = 0;
-    var obj = objGUI.addFolder(name);
+    var obj = objGUI.addFolder(name ? name : ("Object " + objectCount));
     // obj.open()
 
     obj.add({
@@ -42,10 +57,7 @@ var obj = {
       }
     }, "Remove");
 
-
-
     // refPoint.open();
-
     obj.add(mesh, "refEnabled").name("Enabled").name("Rotate Around Object");
     var nameList = {
       Object: "none"
