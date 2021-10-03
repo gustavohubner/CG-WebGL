@@ -114,7 +114,7 @@ class Meshes {
   Cone;
   constructor(gl) {
     this.Cube = flattenedPrimitives.createCubeBufferInfo(gl, 20);
-    this.Sphere = flattenedPrimitives.createSphereBufferInfo(gl, 10, 24, 12);
+    this.Sphere = flattenedPrimitives.createSphereBufferInfo(gl, 10, 15, 7);
     this.Cone = flattenedPrimitives.createTruncatedConeBufferInfo(gl, 10, 0, 20, 12, 1, true, false);
   }
 }
