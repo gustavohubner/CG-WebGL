@@ -1,3 +1,4 @@
+// Variaveis 
 var meshes;
 
 var objectList = [];
@@ -8,19 +9,24 @@ var CamList = [];
 var CamNameList = [];
 var CamCount = 0;
 
+var CurveList = [];
+var CurveNameList = [];
+var CurveCount = 0;
+
 var selectedCam = 0;
 
-var droplists = [];
+var droplistsObj = [];
 var droplistsCam = [];
+var droplistsCurve = [];
 
-var objGUI;
 var gui;
 var gui2;
 var camFolder;
+var curveFolder;
+var objectFolder;
 
 
 const degToRad = (d) => (d * Math.PI) / 180;
-
 const radToDeg = (r) => (r * 180) / Math.PI;
 
 // Classes
@@ -29,6 +35,7 @@ class Animation {
   start = 0;
   finish = 0;
   duration = 1;
+  curveSelected;
   constructor() {
     this.transformations = new Transformations();
   }
@@ -46,6 +53,7 @@ class Transformations {
   orbitRotateX = degToRad(0);
   orbitRotateY = degToRad(0);
   orbitRotateZ = degToRad(0);
+  curveT = 0
   constructor() { }
 }
 class Object3D {
@@ -66,6 +74,10 @@ class Object3D {
 
   refObj = null;
   refEnabled = false;
+
+  curveEnabled = false;
+  curveSelected;
+  curveT = 0;
 
 
   constructor(meshProgramInfo, gl, scale, position, name, color, type) {
@@ -132,14 +144,70 @@ class Camera {
 
   FOV = 50;
 
+  curveEnabled = false;
+  curveSelected;
+  curveT = 0;
+
   constructor() {
     this.transformations = new Transformations();
     this.startState = new Transformations();
     this.transformations.translateZ = 200;
   }
-};
+}
+class Curve {
+  point1;
+  point2;
+  point3;
+  point4;
+  constructor() {
+    this.point1 = new Point(-20, 0, 0);
+    this.point2 = new Point(0, 20, 0);
+    this.point3 = new Point(0, -20, 0);
+    this.point4 = new Point(20, 0, 0);
+  }
 
-// Fumções de Apoio
+  getPositionOnT(t) {
+    var invT = (1 - t);
+
+    return this.point1.mult(invT * invT * invT)
+      .add(this.point2.mult(3 * t * invT * invT))
+      .add(this.point3.mult(3 * invT * t * t))
+      .add(this.point4.mult(t * t * t))
+  }
+}
+class Point {
+  x = 0;
+  y = 0;
+  z = 0;
+  constructor(x, y, z) {
+    this.x = x;
+    this.y = y;
+    this.z = z;
+  }
+
+  add(p) {
+    return new Point(
+      this.x + p.x,
+      this.y + p.y,
+      this.z + p.z);
+  }
+
+  mult(p) {
+    if (Array.isArray(p)) {
+      return new Point(
+        this.x * p.x,
+        this.y * p.y,
+        this.z * p.z);
+    } else {
+      return new Point(
+        this.x * p,
+        this.y * p,
+        this.z * p);
+    }
+  }
+}
+
+// Funções de Apoio
 
 function applyAnimations(object) {
   var ended = false;
@@ -151,7 +219,6 @@ function applyAnimations(object) {
     for (var i = 0; i < object.animation.length; i++) {
       var anim = object.animation[i]
       if (now >= anim.start && now < anim.finish) {
-
         object.running = true
 
         var delta = (now - anim.start) / (anim.finish - anim.start);
@@ -168,6 +235,11 @@ function applyAnimations(object) {
         object.transformations.orbitRotateX = lastAnim.orbitRotateX + anim.transformations.orbitRotateX * delta
         object.transformations.orbitRotateY = lastAnim.orbitRotateY + anim.transformations.orbitRotateY * delta
         object.transformations.orbitRotateZ = lastAnim.orbitRotateZ + anim.transformations.orbitRotateZ * delta
+
+        if (object.curveEnabled) {
+          object.curveSelected = anim.curveSelected;
+          object.curveT = anim.transformations.curveT * delta
+        }
 
       }
       ended = false;
@@ -290,8 +362,8 @@ function animate(object) {
 
 function loadCameraGUI(gui2) {
 
-  var camera = gui2.addFolder("Cameras", { autoPlace: false })
-  camera.domElement.id = 'camera';
+  var camera = gui2.addFolder("Cameras")//, { autoPlace: false })
+  // camera.domElement.id = 'camera';
 
   var cameraList = {
     Target: "none"
@@ -313,6 +385,148 @@ function loadCameraGUI(gui2) {
   addCamBtn.AddCamera();
 }
 
+function loadCurveGUI(gui3) {
+  curveFolder = gui3.addFolder("Curves");
+  curveFolder.add(addCurveBtn, "AddCurve").name("Add Curve");
+}
+
+var addObjBtn = {
+  AddObject: function (scale1, position, color, type, name) {
+    name = name ? name : ("Object " + objectCount);
+    color = color ? color : [params.color[0] / 255, params.color[1] / 255, params.color[2] / 255, 1];
+    var mesh = new Object3D(meshProgramInfo, gl, scale1 ? scale1 : 1, position ? position : [0, 0, 0], name, color, type ? type : params.selected);
+    var animIndex = 0;
+    var obj = objectFolder.addFolder(name ? name : ("Object " + objectCount));
+
+    obj.add({
+      Remove: function () {
+        objectFolder.removeFolder(obj);
+        var index = objectList.indexOf(mesh)
+        objectList.splice(index, 1);
+        objectNameList.splice(index, 1);
+        updateDropLists(droplistsObj, objectNameList);
+      }
+    }, "Remove");
+
+    obj.add(mesh, "refEnabled").name("Enabled").name("Rotate Around Object");
+    var nameList = {
+      Object: "none"
+    };
+    var x = obj.add(nameList, 'Object', objectNameList).name('Target').onFinishChange(function () {
+      var index = objectNameList.indexOf(nameList.Object);
+      if (index != -1) {
+        if (objectNameList[index] != name) {
+          mesh.refObj = objectList[index];
+        } else {
+          console.log("Can't select itself!")
+          nameList.Object = null
+        }
+      } else {
+        nameList.Object = "Error"
+      }
+    });
+    droplistsObj.push(x);
+
+    var transformations = obj.addFolder('Transformations')
+
+    transformations.add(mesh.transformations, "translateX").listen();
+    transformations.add(mesh.transformations, "translateY").listen();
+    transformations.add(mesh.transformations, "translateZ").listen();
+
+    transformations.add(mesh.transformations, "rotateX", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "rotateY", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "rotateZ", degToRad(0), degToRad(360), 0.01).listen();
+
+    transformations.add(mesh.transformations, "scaleX", 0.01).listen();
+    transformations.add(mesh.transformations, "scaleY", 0.01).listen();
+    transformations.add(mesh.transformations, "scaleZ", 0.01).listen();
+
+    transformations.add(mesh.transformations, "orbitRotateX", degToRad(0), degToRad(360)).listen();
+    transformations.add(mesh.transformations, "orbitRotateY", degToRad(0), degToRad(360)).listen();
+    transformations.add(mesh.transformations, "orbitRotateZ", degToRad(0), degToRad(360)).listen();
+
+    var target = {
+      Target: "none"
+    };
+    var curves = obj.addFolder('Curves')
+    curves.add(mesh, "curveEnabled").name("Enabled");
+    var x = curves.add(target, 'Target', CurveNameList).name('Selected Curve').onFinishChange(function () {
+      var index = CurveNameList.indexOf(target.Target);
+      if (index != -1) {
+        mesh.curveSelected = CurveList[index];
+      }
+    }).listen();
+    curves.add(mesh, "curveT", 0, 1).listen();
+
+
+    droplistsCurve.push(x);
+    updateDropLists(droplistsCurve, CurveNameList);
+
+    objectCount++;
+    objectList.push(mesh);
+
+    var anim = obj.addFolder("Animations");
+    anim.add({
+      'Animate': function () {
+        animate(mesh);
+      }
+    }, "Animate");
+
+
+    anim.add(mesh, "loop")
+
+    anim.add({
+      'Add animation': function (folder) {
+        var folder = anim.addFolder("Animation " + animIndex)
+        var newAnim = new Animation();
+        folder.add({
+          'Remove': function () {
+            anim.removeFolder(folder);
+            var index = mesh.animation.indexOf(newAnim);
+            mesh.animation.splice(index, 1);
+          }
+        }, 'Remove')
+        animIndex++;
+
+        newAnim.transformations.scaleX = mesh.transformations.scaleX
+        newAnim.transformations.scaleY = mesh.transformations.scaleY
+        newAnim.transformations.scaleZ = mesh.transformations.scaleZ
+
+        folder.add(newAnim.transformations, "translateX");
+        folder.add(newAnim.transformations, "translateY");
+        folder.add(newAnim.transformations, "translateZ");
+        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.01);
+        folder.add(newAnim.transformations, "scaleX", 0.01);
+        folder.add(newAnim.transformations, "scaleY", 0.01);
+        folder.add(newAnim.transformations, "scaleZ", 0.01);
+        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360));
+        folder.add(newAnim, "duration", 1)
+
+        var target = {
+          Target: "none"
+        };
+        var x = folder.add(target, 'Target', CurveNameList).name('Selected Curve').onFinishChange(function () {
+          var index = CurveNameList.indexOf(target.Target);
+          if (index != -1) {
+            newAnim.curveSelected = CurveList[index];
+          }
+        }).listen();
+        folder.add(newAnim.transformations, "curveT", 0, 1).listen();
+        droplistsCurve.push(x);
+        updateDropLists(droplistsCurve, CurveNameList);
+
+        mesh.animation.push(newAnim);
+      }
+    }, "Add animation");
+
+    updateDropLists(droplistsObj, objectNameList);
+  }
+};
+
 var addCamBtn = {
   AddCamera: function () {
     var animIndex = 0;
@@ -322,13 +536,13 @@ var addCamBtn = {
 
     var folder = camFolder.addFolder(name)
     folder.add(camConfig, "FOV", 5, 160, 0.01);
-    var look = folder.add(camConfig, "lookAtEnabled").name("Look At").listen();
-    var rotate = folder.add(camConfig, "refEnabled").name("Rotate Around").listen();
+    folder.add(camConfig, "lookAtEnabled").name("Look At").listen();
+    folder.add(camConfig, "refEnabled").name("Rotate Around").listen();
 
 
     var nameList = {
       Target: "none"
-    }; folder
+    };
     var x = folder.add(nameList, 'Target', objectNameList).onFinishChange(function () {
       var index = objectNameList.indexOf(nameList.Target);
       if (index != -1) {
@@ -338,21 +552,39 @@ var addCamBtn = {
         nameList.Target = "Error"
       }
     }).listen();
-    droplists.push(x);
+    droplistsObj.push(x);
 
     // camConfig.transformations.translateZ = 200
     var transforms = folder.addFolder("Transformations");
     // transforms.open();
-    transforms.add(camConfig.transformations, "translateX", -1000, 1000, 0.0001);
-    transforms.add(camConfig.transformations, "translateY", -1000, 1000, 0.0001);
-    transforms.add(camConfig.transformations, "translateZ", -1000, 1000, 0.0001);
-    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.0001);
-    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.0001);
-    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.0001);
-    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.0001);
-    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.0001);
-    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.0001);
+    transforms.add(camConfig.transformations, "translateX");
+    transforms.add(camConfig.transformations, "translateY");
+    transforms.add(camConfig.transformations, "translateZ");
+    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360));
+    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360));
+    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360));
+    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360));
+    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360));
+    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360));
     // CamList.push(camConfig)
+
+    var target = {
+      Target: "none"
+    };
+    var curves = folder.addFolder('Curves')
+    curves.add(camConfig, "curveEnabled").name("Enabled");
+    var x = curves.add(target, 'Target', CurveNameList).name('Selected Curve').onFinishChange(function () {
+      var index = CurveNameList.indexOf(target.Target);
+      if (index != -1) {
+        camConfig.curveSelected = CurveList[index];
+      }
+    }).listen();
+    curves.add(camConfig, "curveT", 0, 1).listen();
+
+
+
+    droplistsCurve.push(x);
+    updateDropLists(droplistsCurve, CurveNameList);
 
     var anim = folder.addFolder("Animations");
     anim.add({
@@ -377,19 +609,19 @@ var addCamBtn = {
         }, 'Remove')
         animIndex++;
 
-        newAnim.transformations.scaleX = camConfig.transformations.scaleX
-        newAnim.transformations.scaleY = camConfig.transformations.scaleY
-        newAnim.transformations.scaleZ = camConfig.transformations.scaleZ
+        newAnim.transformations.scaleX = camConfig.transformations.scaleX;
+        newAnim.transformations.scaleY = camConfig.transformations.scaleY;
+        newAnim.transformations.scaleZ = camConfig.transformations.scaleZ;
 
-        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360), 0.0001);
-        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360), 0.0001);
-        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.0001);
-        folder.add(newAnim.transformations, "translateX", -100, 100, 0.0001);
-        folder.add(newAnim.transformations, "translateY", -100, 100, 0.0001);
-        folder.add(newAnim.transformations, "translateZ", -100, 100, 0.0001);
-        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360), 0.0001);
-        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360), 0.0001);
-        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360), 0.0001);
+        folder.add(newAnim.transformations, "translateX");
+        folder.add(newAnim.transformations, "translateY");
+        folder.add(newAnim.transformations, "translateZ");
+        folder.add(newAnim.transformations, "rotateX", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "rotateY", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "rotateZ", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360));
+        folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360));
         folder.add(newAnim, "duration", 0.01, 1000, 0.01);
 
         camConfig.animation.push(newAnim);
@@ -398,9 +630,54 @@ var addCamBtn = {
 
     CamNameList.push(name);
     CamList.push(camConfig);
-    updateDropListCam();
+    updateDropLists(droplistsCam, CamNameList);
   }
 
+}
+
+var addCurveBtn = {
+  AddCurve: function () {
+    var curve = new Curve()
+    var name = "Curve " + CurveCount;
+    CurveCount++;
+
+    var folder = curveFolder.addFolder(name);
+    folder.add({
+      'Remove': function () {
+        curveFolder.removeFolder(folder);
+        var index = CurveNameList.indexOf(name)
+        CurveList.splice(index, 1);
+        CurveNameList.splice(index, 1);
+        updateDropLists(droplistsCurve, CurveNameList);
+
+      }
+    }, 'Remove')
+    var p1 = folder.addFolder('Point 1');
+    p1.add(curve.point1, "x").name("X");
+    p1.add(curve.point1, "y").name("Y");
+    p1.add(curve.point1, "z").name("Z");
+    var p2 = folder.addFolder('Point 2');
+    p2.add(curve.point2, "x").name("X");
+    p2.add(curve.point2, "y").name("Y");
+    p2.add(curve.point2, "z").name("Z");
+    var p3 = folder.addFolder('Point 3');
+    p3.add(curve.point3, "x").name("X");
+    p3.add(curve.point3, "y").name("Y");
+    p3.add(curve.point3, "z").name("Z");
+    var p4 = folder.addFolder('Point 4');
+    p4.add(curve.point4, "x").name("X");
+    p4.add(curve.point4, "y").name("Y");
+    p4.add(curve.point4, "z").name("Z");
+    p1.open();
+    p2.open();
+    p3.open();
+    p4.open();
+
+    CurveNameList.push(name);
+    CurveList.push(curve);
+    updateDropLists(droplistsCurve, CurveNameList);
+
+  }
 }
 
 function getSelectedCam() {
@@ -408,29 +685,29 @@ function getSelectedCam() {
 }
 
 function loadSolarSystem() {
-  obj.AddObject(0.7, [0, 0, 0], [1, 0.8, 0, 0.3], 2, "Sun"); //sol
+  addObjBtn.AddObject(0.7, [0, 0, 0], [1, 0.8, 0, 0.3], 2, "Sun"); //sol
 
   // Planetas:
-  obj.AddObject(0.095, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Mercury"); // Mercurio
-  obj.AddObject(0.237, [25.3, 0, 0], [1, 0.9, 0.4, 0.7], 2, "Venus"); // Venus
-  obj.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth"); // Terra
-  obj.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars"); // Marte
-  obj.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter"); // Jupiter
-  obj.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); // Saturno
-  obj.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus"); // Urano
-  obj.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); // Netuno
+  addObjBtn.AddObject(0.095, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Mercury"); // Mercurio
+  addObjBtn.AddObject(0.237, [25.3, 0, 0], [1, 0.9, 0.4, 0.7], 2, "Venus"); // Venus
+  addObjBtn.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth"); // Terra
+  addObjBtn.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars"); // Marte
+  addObjBtn.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter"); // Jupiter
+  addObjBtn.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); // Saturno
+  addObjBtn.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus"); // Urano
+  addObjBtn.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); // Netuno
 
   // Luas:
-  obj.AddObject(0.067, [5, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Earth - Moon");
+  addObjBtn.AddObject(0.067, [5, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Earth - Moon");
 
-  obj.AddObject(0.060, [10, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Io");
-  obj.AddObject(0.05, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Europa");
-  obj.AddObject(0.08, [20, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Ganymede");
-  obj.AddObject(0.074, [30, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Callisto");
+  addObjBtn.AddObject(0.060, [10, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Io");
+  addObjBtn.AddObject(0.05, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Europa");
+  addObjBtn.AddObject(0.08, [20, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Ganymede");
+  addObjBtn.AddObject(0.074, [30, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Callisto");
 
 
 
-  obj.AddObject(1, [0, 0, 0], [0.9, 0.8, 0.6, 1], 2, "Saturn Ring"); // Anel Saturnp
+  addObjBtn.AddObject(1, [0, 0, 0], [0.9, 0.8, 0.6, 1], 2, "Saturn Ring"); // Anel Saturnp
   objectList[14].transformations.scaleY = 0.05
   objectList[14].refObj = objectList[6]
   objectList[14].refEnabled = true

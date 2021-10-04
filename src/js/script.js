@@ -34,16 +34,29 @@ function computeMatrix(viewProjectionMatrix, object) {
     object.transformations.translateZ
   );
 
+  // Aplica curva
+  if (object.curveEnabled && object.curveSelected != null) {
+    var offset = object.curveSelected.getPositionOnT(object.curveT);
+    // console.log (object.curveT, offset);
+    matrix = m4.translate(
+      matrix,
+      offset.x,
+      offset.y,
+      offset.z
+    );
+  }
+
   matrix = m4.xRotate(matrix, object.transformations.rotateX);
   matrix = m4.yRotate(matrix, object.transformations.rotateY);
   matrix = m4.zRotate(matrix, object.transformations.rotateZ);
 
   matrix = m4.scale(matrix, object.transformations.scaleX, object.transformations.scaleY, object.transformations.scaleZ);
 
-  object.worldPosition = [matrix[12],matrix[13],matrix[14]];
+  object.worldPosition = [matrix[12], matrix[13], matrix[14]];
+  // console.log(object.worldPosition)
 
   //multiplico somente no final para obter a posição do objeto apos a rotação
-  return m4.multiply(viewProjectionMatrix,matrix);
+  return m4.multiply(viewProjectionMatrix, matrix);
 }
 
 function render() {
@@ -84,6 +97,17 @@ function render() {
     camConfig.transformations.translateY,
     camConfig.transformations.translateZ
   );
+
+  if (camConfig.curveEnabled && camConfig.curveSelected != null) {
+    var offset = camConfig.curveSelected.getPositionOnT(camConfig.curveT);
+    // console.log (object.curveT, offset);
+    cameraMatrix = m4.translate(
+      cameraMatrix,
+      offset.x,
+      offset.y,
+      offset.z
+    );
+  }
 
   // look at
   if (camConfig.lookAtEnabled) {
