@@ -207,8 +207,7 @@ class Point {
   }
 }
 
-// Funções de Apoio
-
+// Funções usadas nas Animações e Transformações
 function applyAnimations(object) {
   var ended = false;
 
@@ -274,7 +273,6 @@ function applyAnimations(object) {
   }
 
 }
-
 function sumChanges(object, now) {
   var x = new Transformations()
 
@@ -312,7 +310,6 @@ function sumChanges(object, now) {
   return x;
 
 }
-
 function rotateRef(matrix, ref) {
   ref2 = ref.refObj;
   if (ref2 != null)
@@ -333,7 +330,6 @@ function rotateRef(matrix, ref) {
 
   return matrix;
 }
-
 function animate(object) {
   var totalTime = 1;
   object.animation.forEach(anim => {
@@ -359,7 +355,13 @@ function animate(object) {
 
   return;
 }
+function getSelectedCam() {
+  return CamList[selectedCam];
+}
 
+
+
+// Funções usadas na GUI
 function loadCameraGUI(gui2) {
 
   var camera = gui2.addFolder("Cameras")//, { autoPlace: false })
@@ -384,12 +386,22 @@ function loadCameraGUI(gui2) {
   camFolder.open();
   addCamBtn.AddCamera();
 }
-
 function loadCurveGUI(gui3) {
   curveFolder = gui3.addFolder("Curves");
   curveFolder.add(addCurveBtn, "AddCurve").name("Add Curve");
 }
+function updateDropLists(lists, names) {
+  lists.forEach(object => {
+    innerHTMLStr = "";
+    var i;
+    for (i = 0; i < names.length; i++) {
+      var str = "<option value='" + names[i] + "'>" + names[i] + "</option>";
+      innerHTMLStr += str;
 
+    }
+    if (innerHTMLStr != "") object.domElement.children[0].innerHTML = innerHTMLStr;
+  });
+}
 var addObjBtn = {
   AddObject: function (scale1, position, color, type, name) {
     name = name ? name : ("Object " + objectCount);
@@ -525,8 +537,7 @@ var addObjBtn = {
 
     updateDropLists(droplistsObj, objectNameList);
   }
-};
-
+}
 var addCamBtn = {
   AddCamera: function () {
     var animIndex = 0;
@@ -648,7 +659,6 @@ var addCamBtn = {
   }
 
 }
-
 var addCurveBtn = {
   AddCurve: function () {
     var curve = new Curve()
@@ -694,45 +704,44 @@ var addCurveBtn = {
   }
 }
 
-function getSelectedCam() {
-  return CamList[selectedCam];
-}
-
+// Exemplos prontos
 function loadSolarSystem() {
   addObjBtn.AddObject(0.7, [0, 0, 0], [1, 0.8, 0, 0.3], 2, "Sun"); //sol
 
   // Planetas:
-  addObjBtn.AddObject(0.095, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Mercury"); // Mercurio
-  addObjBtn.AddObject(0.237, [25.3, 0, 0], [1, 0.9, 0.4, 0.7], 2, "Venus"); // Venus
-  addObjBtn.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth"); // Terra
-  addObjBtn.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars"); // Marte
-  addObjBtn.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter"); // Jupiter
-  addObjBtn.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); // Saturno
-  addObjBtn.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus"); // Urano
-  addObjBtn.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); // Netuno
+  addObjBtn.AddObject(0.095, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Mercury");
+  addObjBtn.AddObject(0.237, [25.3, 0, 0], [1, 0.9, 0.4, 0.7], 2, "Venus");
+  addObjBtn.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth");
+  addObjBtn.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars");
+  addObjBtn.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter");
+  addObjBtn.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); 
+  addObjBtn.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus");
+  addObjBtn.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); 
 
   // Luas:
   addObjBtn.AddObject(0.067, [5, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Earth - Moon");
 
-  addObjBtn.AddObject(0.060, [10, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Io");
-  addObjBtn.AddObject(0.05, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Europa");
-  addObjBtn.AddObject(0.08, [20, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Ganymede");
-  addObjBtn.AddObject(0.074, [30, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Jup - Callisto");
+  addObjBtn.AddObject(0.060, [10, 0, 0], [1, 0.9, 0.6, 0.8], 2, "Jup - Io");
+  addObjBtn.AddObject(0.05, [13, 0, 0], [1, 1, 0.9, 0.8], 2, "Jup - Europa");
+  addObjBtn.AddObject(0.08, [20, 0, 0], [0.4, 0.4, 0.3, 0.8], 2, "Jup - Ganymede");
+  addObjBtn.AddObject(0.074, [30, 0, 0], [0.3, 0.3, 0.3, 0.8], 2, "Jup - Callisto");
+
+  addObjBtn.AddObject(0.014, [13, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Sat - Mimas");
+  addObjBtn.AddObject(0.0168, [16, 0, 0], [0.7, 0.9, 0.8, 0.8], 2, "Sat - Enceladus");
+  addObjBtn.AddObject(0.036, [17, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Sat - Tethys");
+  addObjBtn.AddObject(0.0384, [19, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Sat - Rhea");
+  addObjBtn.AddObject(0.0528, [25, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Sat - Dione");
+  addObjBtn.AddObject(0.09, [37, 0, 0], [0.9, 0.8, 0.2, 0.8], 2, "Sat - Titan");
+  addObjBtn.AddObject(0.05, [70, 0, 0], [0.6, 0.4, 0.3, 0.8], 2, "Sat - Iapetus");
+
+  addObjBtn.AddObject(1, [0, 0, 0], [0.9, 0.8, 0.6, 1], 2, "Saturn Ring"); // Anel Saturno
 
 
-
-  addObjBtn.AddObject(1, [0, 0, 0], [0.9, 0.8, 0.6, 1], 2, "Saturn Ring"); // Anel Saturnp
-  objectList[14].transformations.scaleY = 0.05
-  objectList[14].refObj = objectList[6]
-  objectList[14].refEnabled = true
-
-
-
-  var periods = [0.39, 0.72, 1.00, 1.52, 5.20, 9.58, 19.20, 30.05, 0.07, 0.1, 0.2, 0.4, 0.9];
+  var periods = [0.39, 0.72, 1.00, 1.52, 5.20, 9.58, 19.20, 30.05, /* luas */0.07, 0.1, 0.2, 0.4, 0.9, /*saturno*/0.0336, 0.063, 0.098, 0.189, 0.315, 1.12, 5.53];
   CamList[0].transformations.translateZ = 900;
   CamList[0].transformations.translateY = 100;
 
-  for (var i = 1; i < 14; i++) {
+  for (var i = 1; i < objectList.length; i++) {
     objectList[i].refObj = objectList[0];
     objectList[i].refEnabled = true;
     objectList[i].running = true;
@@ -747,13 +756,23 @@ function loadSolarSystem() {
     objectList[i].animation.push(anim);
     animate(objectList[i]);
   }
+  // lua Terra
+  objectList[9].refObj = objectList[3];
+  // luas Jupiter
+  for (var i = 10; i < 14; i++) {
+    objectList[i].refObj = objectList[5];
+  }
+  // luas Saturno
+  for (var i = 14; i < 21; i++) {
+    objectList[i].refObj = objectList[6];
+  }
+  // anel Saturno
+  var ind = objectNameList.indexOf("Saturn Ring");
+  objectList[ind].transformations.scaleY = 0.05
+  objectList[ind].refObj = objectList[6]
+  objectList[ind].refEnabled = true
 
-  objectList[9].refObj = objectList[3]
 
-  objectList[10].refObj = objectList[5]
-  objectList[11].refObj = objectList[5]
-  objectList[12].refObj = objectList[5]
-  objectList[13].refObj = objectList[5]
 
   CamList[0].refObj = objectList[3];
   CamList[0].transformations.rotateX = -0.11;
@@ -790,15 +809,4 @@ function loadCurveExample() {
   animate(objectList[0]);
 }
 
-function updateDropLists(lists, names) {
-  lists.forEach(object => {
-    innerHTMLStr = "";
-    var i;
-    for (i = 0; i < names.length; i++) {
-      var str = "<option value='" + names[i] + "'>" + names[i] + "</option>";
-      innerHTMLStr += str;
 
-    }
-    if (innerHTMLStr != "") object.domElement.children[0].innerHTML = innerHTMLStr;
-  });
-}

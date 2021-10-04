@@ -11,7 +11,6 @@ function computeMatrix(viewProjectionMatrix, object) {
   // var matrix = viewProjectionMatrix;
   var matrix = m4.identity();
 
-
   // Se usar rotação en torno de um Objeto de referência
   if (object.refEnabled && object.refObj != null) {
     var ref = object.refObj;
@@ -20,7 +19,6 @@ function computeMatrix(viewProjectionMatrix, object) {
     // é uma função recursiva para aplicar as rotações e translações necessárias
     // para mover junto com a refencia, permitindo uma organização em árvores de 
     // pai - filhos
-
     matrix = m4.xRotate(matrix, object.transformations.orbitRotateX);
     matrix = m4.yRotate(matrix, object.transformations.orbitRotateY);
     matrix = m4.zRotate(matrix, object.transformations.orbitRotateZ);
@@ -53,9 +51,8 @@ function computeMatrix(viewProjectionMatrix, object) {
   matrix = m4.scale(matrix, object.transformations.scaleX, object.transformations.scaleY, object.transformations.scaleZ);
 
   object.worldPosition = [matrix[12], matrix[13], matrix[14]];
-  // console.log(object.worldPosition)
 
-  //multiplico somente no final para obter a posição do objeto apos a rotação
+  //multiplico somente no final para obter a posição do objeto após a rotação
   return m4.multiply(viewProjectionMatrix, matrix);
 }
 
@@ -145,7 +142,6 @@ function render() {
   gl.clearColor(0, 0, 0, 1);
   gl.clear(gl.COLOR_BUFFER_BIT);
 
-
   // Desenha os objetos
   objectList.forEach(object => {
 
@@ -162,7 +158,6 @@ function render() {
     twgl.setUniforms(meshProgramInfo, object.Uniforms);
     twgl.drawBufferInfo(gl, object.BufferInfo);
   });
-
   requestAnimationFrame(render);
 }
 
