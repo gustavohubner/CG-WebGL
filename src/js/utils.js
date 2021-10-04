@@ -331,7 +331,7 @@ function rotateRef(matrix, ref) {
   return matrix;
 }
 function animate(object) {
-  var totalTime = 1;
+  var totalTime = 10;
   object.animation.forEach(anim => {
     anim.start = Date.now() + totalTime;
     anim.finish = anim.start + (anim.duration * 1000);
@@ -571,12 +571,12 @@ var addCamBtn = {
     transforms.add(camConfig.transformations, "translateX");
     transforms.add(camConfig.transformations, "translateY");
     transforms.add(camConfig.transformations, "translateZ");
-    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360),0.001);
-    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360),0.001);
-    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360),0.001);
-    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360),0.01);
-    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360),0.01);
-    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360),0.01);
+    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360), 0.001);
+    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360), 0.001);
+    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360), 0.001);
+    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360), 0.01);
+    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360), 0.01);
+    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360), 0.01);
     // CamList.push(camConfig)
 
     var target = {
@@ -714,9 +714,9 @@ function loadSolarSystem() {
   addObjBtn.AddObject(0.25, [35, 0, 0], [0, 0.8, 0.7, 0.8], 2, "Earth");
   addObjBtn.AddObject(0.1325, [53, 0, 0], [0.8, 0.3, 0, 0.8], 2, "Mars");
   addObjBtn.AddObject(0.5, [182, 0, 0], [0.9, 0.7, 0.5, 0.8], 2, "Jupiter");
-  addObjBtn.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn"); 
+  addObjBtn.AddObject(0.45, [335, 0, 0], [0.9, 0.8, 0.4, 0.9], 2, "Saturn");
   addObjBtn.AddObject(0.35, [672, 0, 0], [0.4, 1, 0.9, 0.95], 2, "Uranus");
-  addObjBtn.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune"); 
+  addObjBtn.AddObject(0.33, [1051, 0, 0], [0.2, 0.4, 1, 1], 2, "Neptune");
 
   // Luas:
   addObjBtn.AddObject(0.067, [5, 0, 0], [0.6, 0.6, 0.5, 0.8], 2, "Earth - Moon");
