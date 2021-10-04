@@ -335,7 +335,7 @@ function rotateRef(matrix, ref) {
 }
 
 function animate(object) {
-  var totalTime = 0;
+  var totalTime = 1;
   object.animation.forEach(anim => {
     anim.start = Date.now() + totalTime;
     anim.finish = anim.start + (anim.duration * 1000);
@@ -622,7 +622,21 @@ var addCamBtn = {
         folder.add(newAnim.transformations, "orbitRotateX", degToRad(-360), degToRad(360));
         folder.add(newAnim.transformations, "orbitRotateY", degToRad(-360), degToRad(360));
         folder.add(newAnim.transformations, "orbitRotateZ", degToRad(-360), degToRad(360));
-        folder.add(newAnim, "duration", 0.01, 1000, 0.01);
+        folder.add(newAnim, "duration", 1);
+
+        var target = {
+          Target: "none"
+        };
+        var x = folder.add(target, 'Target', CurveNameList).name('Selected Curve').onFinishChange(function () {
+          var index = CurveNameList.indexOf(target.Target);
+          if (index != -1) {
+            newAnim.curveSelected = CurveList[index];
+          }
+        }).listen();
+        folder.add(newAnim.transformations, "curveT", 0, 1).listen();
+        droplistsCurve.push(x);
+        updateDropLists(droplistsCurve, CurveNameList);
+
 
         camConfig.animation.push(newAnim);
       }
@@ -743,4 +757,48 @@ function loadSolarSystem() {
 
   CamList[0].refObj = objectList[3];
   CamList[0].transformations.rotateX = -0.11;
+}
+function loadCurveExample() {
+  addObjBtn.AddObject(1, [0, 0, 0], undefined, 1, "Cube");
+  addCurveBtn.AddCurve();
+  addCurveBtn.AddCurve();
+
+  CurveList[0].point1 = new Point(100, 0, 0);
+  CurveList[0].point2 = new Point(0, 100, 0);
+  CurveList[0].point3 = new Point(0, -100, 0);
+  CurveList[0].point4 = new Point(-100, 0, 0);
+
+  CurveList[1].point1 = new Point(-100, 0, 0);
+  CurveList[1].point2 = new Point(0, 100, 0);
+  CurveList[1].point3 = new Point(0, -100, 0);
+  CurveList[1].point4 = new Point(100, 0, 0);
+
+  anim0 = new Animation;
+  anim0.curveSelected = CurveList[0];
+  anim0.transformations.curveT = 1;
+  anim0.duration = 5
+
+  anim1 = new Animation;
+  anim1.curveSelected = CurveList[1];
+  anim1.transformations.curveT = 1;
+  anim1.duration = 5
+
+  objectList[0].animation.push(anim0);
+  objectList[0].animation.push(anim1);
+  objectList[0].curveEnabled = true
+  objectList[0].loop = true
+  animate(objectList[0]);
+}
+
+function updateDropLists(lists, names) {
+  lists.forEach(object => {
+    innerHTMLStr = "";
+    var i;
+    for (i = 0; i < names.length; i++) {
+      var str = "<option value='" + names[i] + "'>" + names[i] + "</option>";
+      innerHTMLStr += str;
+
+    }
+    if (innerHTMLStr != "") object.domElement.children[0].innerHTML = innerHTMLStr;
+  });
 }

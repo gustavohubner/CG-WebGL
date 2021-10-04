@@ -24,6 +24,19 @@ const loadGUI = (mesh, webgl) => {
 
   gui3 = new dat.GUI();
   gui2 = new dat.GUI();
+  var extra = new dat.GUI()
+  var obj = {
+    load1: function () {
+      loadSolarSystem();
+      extra.destroy()
+    },
+    load2: function () {
+      loadCurveExample();
+      extra.destroy()
+    }
+  };
+  extra.add(obj, 'load1').name("Solar System");
+  extra.add(obj, 'load2').name("Curves Example");
 
 
 
@@ -34,16 +47,3 @@ const loadGUI = (mesh, webgl) => {
   // Carrega exemplo
   // loadSolarSystem();
 };
-
-function updateDropLists(lists,names) {
-  lists.forEach(object => {
-    innerHTMLStr = "";
-    var i;
-    for (i = 0; i < names.length; i++) {
-      var str = "<option value='" + names[i] + "'>" + names[i] + "</option>";
-      innerHTMLStr += str;
-
-    }
-    if (innerHTMLStr != "") object.domElement.children[0].innerHTML = innerHTMLStr;
-  });
-}
