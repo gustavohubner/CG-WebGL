@@ -441,21 +441,21 @@ var addObjBtn = {
 
     var transformations = obj.addFolder('Transformations')
 
-    transformations.add(mesh.transformations, "translateX").listen();
-    transformations.add(mesh.transformations, "translateY").listen();
-    transformations.add(mesh.transformations, "translateZ").listen();
+    transformations.add(mesh.transformations, "translateX");
+    transformations.add(mesh.transformations, "translateY");
+    transformations.add(mesh.transformations, "translateZ");
 
-    transformations.add(mesh.transformations, "rotateX", degToRad(0), degToRad(360), 0.01).listen();
-    transformations.add(mesh.transformations, "rotateY", degToRad(0), degToRad(360), 0.01).listen();
-    transformations.add(mesh.transformations, "rotateZ", degToRad(0), degToRad(360), 0.01).listen();
+    transformations.add(mesh.transformations, "rotateX", degToRad(0), degToRad(360), 0.01);
+    transformations.add(mesh.transformations, "rotateY", degToRad(0), degToRad(360), 0.01);
+    transformations.add(mesh.transformations, "rotateZ", degToRad(0), degToRad(360), 0.01);
 
-    transformations.add(mesh.transformations, "scaleX", 0.01).listen();
-    transformations.add(mesh.transformations, "scaleY", 0.01).listen();
-    transformations.add(mesh.transformations, "scaleZ", 0.01).listen();
+    transformations.add(mesh.transformations, "scaleX", 0.01);
+    transformations.add(mesh.transformations, "scaleY", 0.01);
+    transformations.add(mesh.transformations, "scaleZ", 0.01);
 
-    transformations.add(mesh.transformations, "orbitRotateX", degToRad(0), degToRad(360)).listen();
-    transformations.add(mesh.transformations, "orbitRotateY", degToRad(0), degToRad(360)).listen();
-    transformations.add(mesh.transformations, "orbitRotateZ", degToRad(0), degToRad(360)).listen();
+    transformations.add(mesh.transformations, "orbitRotateX", degToRad(0), degToRad(360));
+    transformations.add(mesh.transformations, "orbitRotateY", degToRad(0), degToRad(360));
+    transformations.add(mesh.transformations, "orbitRotateZ", degToRad(0), degToRad(360));
 
     var target = {
       Target: "none"
@@ -571,12 +571,12 @@ var addCamBtn = {
     transforms.add(camConfig.transformations, "translateX");
     transforms.add(camConfig.transformations, "translateY");
     transforms.add(camConfig.transformations, "translateZ");
-    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360));
-    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360));
-    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360));
-    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360));
-    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360));
-    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360));
+    transforms.add(camConfig.transformations, "rotateX", degToRad(-360), degToRad(360),0.001);
+    transforms.add(camConfig.transformations, "rotateY", degToRad(-360), degToRad(360),0.001);
+    transforms.add(camConfig.transformations, "rotateZ", degToRad(-360), degToRad(360),0.001);
+    transforms.add(camConfig.transformations, "orbitRotateX", degToRad(0), degToRad(360),0.01);
+    transforms.add(camConfig.transformations, "orbitRotateY", degToRad(0), degToRad(360),0.01);
+    transforms.add(camConfig.transformations, "orbitRotateZ", degToRad(0), degToRad(360),0.01);
     // CamList.push(camConfig)
 
     var target = {
@@ -738,8 +738,8 @@ function loadSolarSystem() {
 
 
   var periods = [0.39, 0.72, 1.00, 1.52, 5.20, 9.58, 19.20, 30.05, /* luas */0.07, 0.1, 0.2, 0.4, 0.9, /*saturno*/0.0336, 0.063, 0.098, 0.189, 0.315, 1.12, 5.53];
-  CamList[0].transformations.translateZ = 900;
-  CamList[0].transformations.translateY = 100;
+  CamList[0].transformations.translateZ = 400;
+  CamList[0].transformations.translateY = 200;
 
   for (var i = 1; i < objectList.length; i++) {
     objectList[i].refObj = objectList[0];
@@ -775,7 +775,7 @@ function loadSolarSystem() {
 
 
   CamList[0].refObj = objectList[3];
-  CamList[0].transformations.rotateX = -0.11;
+  CamList[0].transformations.rotateX = -0.4;
 }
 function loadCurveExample() {
   addObjBtn.AddObject(1, [0, 0, 0], undefined, 1, "Cube");

@@ -3,7 +3,6 @@ var gl;
 var params = {
   selected: 1,
   color: [255, 255, 255]
-
 }
 const loadGUI = (mesh, webgl) => {
   gl = webgl;
@@ -38,12 +37,6 @@ const loadGUI = (mesh, webgl) => {
   extra.add(obj, 'load1').name("Solar System");
   extra.add(obj, 'load2').name("Curves Example");
 
-
-
-  // ---- Camera
   loadCameraGUI(gui2);
   loadCurveGUI(gui3);
-
-  // Carrega exemplo
-  // loadSolarSystem();
 };
